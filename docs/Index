@@ -1,0 +1,17 @@
+$Id: Index,v 1.1.1.1 2006/03/08 23:28:04 malign Exp $
+
+TS5                   - An overview of the TS5 protocol
+TSora                 - TS3 Protocol specs for that Ignite uses to manage user and channel timestamping
+Index                 - This file
+ircd.8                - Ignite IRCd manpage
+Tuning                - Information on fine tuning Ignite
+Authors               - Ignite development team
+License               - Ignite GNU GPL
+RFC1459               - The old IRC protocol standard
+Changelog             - Ignite change history
+Operators             - IRC Operator reference
+IgniteOpers           - Ignite IRC Operator modes
+ConnectFlags          - I: line special characters
+Capabilities          - Description of the VERSION flags and what they mean
+ignite.conf.sample    - Sample Ignite configuration file
+opers.help            - Operator/Administrator /quote help file

@@ -1,0 +1,182 @@
+dnl $Id: configure.in,v 1.1.1.1 2006/03/08 23:28:04 malign Exp $
+dnl Process this file with autoconf to produce a configure script.
+AC_INIT(include/class.h)
+
+AC_CONFIG_AUX_DIR(autoconf)
+AC_CONFIG_HEADER(include/setup.h)
+
+PACKAGE=ircd-hybrid
+VERSION=6.3
+AC_SUBST(PACKAGE)
+AC_SUBST(VERSION)
+
+dnl Checks for programs.
+AC_PROG_CC
+AC_ISC_POSIX
+AC_CANONICAL_SYSTEM
+AC_PROG_MAKE_SET
+AC_PATH_PROG(RM,rm)
+AC_PATH_PROG(CP,cp)
+AC_PROG_INSTALL
+AC_C_INLINE
+
+dnl Checks for libraries.
+AC_CHECK_LIB(socket, socket)
+AC_CHECK_FUNC(crypt,, AC_CHECK_LIB(descrypt, crypt,,AC_CHECK_LIB(crypt, crypt,,)))
+AC_CHECK_FUNC(inet_ntoa,, AC_CHECK_LIB(nsl, inet_ntoa,,))
+AC_CHECK_FUNC(inet_aton,, AC_CHECK_LIB(resolv, inet_aton,,))
+
+dnl Checks for header files.
+AC_HEADER_STDC
+AC_CHECK_HEADERS(sys/param.h sys/select.h errno.h string.h stddef.h getopt.h crypt.h) 
+
+dnl Check for stdarg.h - if we can't find it, halt configure
+AC_CHECK_HEADER(stdarg.h, , AC_MSG_ERROR(** stdarg.h could not be found - ircd-hybrid will not compile without it **))
+
+dnl Checks for library functions.
+AC_PROG_GCC_TRADITIONAL
+
+dnl Check for zlib support (-lz) by looking for deflate().  Then check
+dnl for zlib 1.0.2 or higher by looking for zlibVersion().
+AC_CHECK_LIB(z, deflate)
+AC_CHECK_FUNC(zlibVersion, , AC_MSG_WARN(zlib 1.0.2 or higher required for ZIPLINK support))
+
+dnl check for poll() call
+AC_CHECK_FUNC(poll, AC_DEFINE(USE_POLL),)
+
+dnl taken from ircd's Config script
+AC_MSG_CHECKING(for non-blocking socket implementation)
+AC_TRY_RUN(
+[
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <sys/file.h>
+#include <signal.h>
+#include <stdlib.h>
+alarmed()
+{
+	exit(1);
+}
+int main()
+{
+#if defined(O_NONBLOCK)
+	char b[12], x[32];
+	int f, l = sizeof(x);
+	f = socket(AF_INET, SOCK_DGRAM, 0);
+	if (f >= 0 && !(fcntl(f, F_SETFL, O_NONBLOCK))) {
+		signal(SIGALRM, alarmed);
+		alarm(3);
+		recvfrom(f, b, 12, 0, (struct sockaddr *)x, &l);
+		alarm(0);
+		exit(0);
+	}
+#endif
+	exit(1);
+}
+], AC_DEFINE(NBLOCK_POSIX) AC_MSG_RESULT( O_NONBLOCK ),, AC_MSG_RESULT( cross compiling ))
+
+dnl try mmap() support
+AC_FUNC_MMAP
+
+AC_TRY_RUN(
+[
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <sys/file.h>
+#include <signal.h>
+#include <stdlib.h>
+alarmed()
+{
+	exit(1);
+}
+int main()
+{
+#if defined( O_NDELAY ) && !defined( NBLOCK_POSIX )
+	char b[12], x[32];
+	int f, l = sizeof(x);
+	f = socket(AF_INET, SOCK_DGRAM, 0);
+	if (f >= 0 && !(fcntl(f, F_SETFL, O_NDELAY))) {
+		signal(SIGALRM, alarmed);
+		alarm(3);
+		recvfrom(f, b, 12, 0, (struct sockaddr *)x, &l);
+		alarm(0);
+		exit(0);
+	}
+#endif
+	exit(1);
+}
+], AC_DEFINE(NBLOCK_BSD) AC_MSG_RESULT( O_NDELAY ),, AC_MSG_RESULT(unable to test))
+
+AC_TRY_RUN(
+[
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <sys/file.h>
+#include <signal.h>
+#include <stdlib.h>
+alarmed()
+{
+	exit(1);
+}
+int main()
+{
+#if !defined(NBLOCK_BSD) && !defined(NBLOCK_POSIX) && defined(FIONBIO)
+	char b[12], x[32];
+	int f, l = sizeof(x);
+	f = socket(AF_INET, SOCK_DGRAM, 0);
+	if (f >= 0 && !(fcntl(f, F_SETFL, FIONBIO))) {
+		signal(SIGALRM, alarmed);
+		alarm(3);
+		recvfrom(f, b, 12, 0, (struct sockaddr *)x, &l);
+		alarm(0);
+		exit(0);
+	}
+#endif /* !NBLOCK_POSIX && !NBLOCK_BSD && FIONBIO */
+	exit(1);
+}
+], AC_DEFINE(NBLOCK_SYSV) AC_MSG_RESULT(FIONBIO),, AC_MSG_RESULT(unable to test))
+
+dnl taken from ircd's Config script
+AC_MSG_CHECKING(signal implementation)
+AC_TRY_RUN(
+[
+#include <stdlib.h>
+int main()
+{
+#if defined(HAVE_SIGACTION)
+	exit(0);
+#else
+	exit(1);
+#endif
+}
+], AC_DEFINE(POSIX_SIGNALS) AC_MSG_RESULT(posix),
+    AC_TRY_RUN(
+[
+#include <signal.h>
+#include <stdlib.h>
+int calls = 0;
+void handler()
+{
+	if (calls) return;
+ 	calls++;
+	kill(getpid(), SIGTERM);
+	sleep(1);
+}
+int main()
+{
+	signal(SIGTERM, handler);
+	kill(getpid(), SIGTERM);
+	exit (0);
+}
+], AC_DEFINE(BSD_RELIABLE_SIGNALS) AC_MSG_RESULT(bsd),
+    AC_DEFINE(SYSV_UNRELIABLE_SIGNALS) AC_MSG_RESULT(sysv), AC_MSG_RESULT(uknown)),
+AC_MSG_RESULT(unknown))
+
+AC_OUTPUT(Makefile adns/Makefile src/Makefile tools/Makefile)
+

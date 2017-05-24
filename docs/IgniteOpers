@@ -1,0 +1,168 @@
+$Id: IgniteOpers,v 1.1.1.1 2006/03/08 23:28:04 malign Exp $
+
+Ignite IRCd Operator/Administrator Manual
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+User modes: ('*' designates that UMODE is oper only)
+
+ +o  - Designates this client is an IRC Operator.
+ +a  - Designates this client is an IRC Administrator.
+ +i  - Designates this client 'invisible'.
+ +w  - Can see server wallops.
+ +z* - Can see oper wallops.
+ +s  - Can see generic server messages and oper kills.
+ +c* - Can see client connections and exits.
+ +r* - Can see 'rejected' client notices.
+ +k  - Can see server kill messages.
+ +f* - Can see 'I-line is full' notices.
+ +y* - Can see stats/links/admin requests to name a few.
+ +d* - Can see server debug messages.
+ +n* - Can see client nick changes.
+ +b* - Can see possible bot warnings.
+ +x* - Can see new server introduction and server splits.
+
+Oper/Admin commands: ('+' indicates that /quote must be used)
+
+  CLOSE    - CLOSE
+             Close any connections from clients who have not fully registered yet.
+  CONNECT  - CONNECT <server> [port]
+             Initiates link with <server> on [port].
+  DIE      - DIE [reason]
+             Terminates the IRC server with optional [reason].
++ DLINE    - DLINE <nick|IP> :[reason]
+             Adds a DLINE to ircd.conf or klines.conf
+             which will deny any connections from the banned IP address.
+             The banned client will receive a message saying they are banned with [reason].
+             In order to use <nick> rather than <IP>, <nick> must be on your server.
++ DNS      - DNS
+             Displays stats about Ignite asynchronous resolving code.
++ FJOIN    - FJOIN <nick> <channel>
+             Forces <nick> to join <channel>.
++ FNICK    - FNICK <nick> <new nick>
+             Force nickname change from <nick> to <new nick>.
++ GLINE    - GLINE <user@host> :[reason]
+             -- If compiled with GLINE --
+             Attempts to add a global IRC network wide ban on <user@host> for [reason].
+             It takes three different Opers/Admins on three different
+             servers to do the same GLINE within a short interval
+             to have a GLINE triggered for a compiled time of hours.
++ HASH     - HASH
+             Displays stats about Ignite internal hashes.
++ HTM      - HTM [option]
+             When no [option] is given, HTM shows the current
+             High Traffic Mode rate and whether HTM is ON or OFF.
+             [option] can be one of the following:
+               ON        - Forces High Traffic Mode ON. With
+                           this on, Ignite is more efficient in
+                           reading server-to-server and Oper/Admin traffic, but will be less efficient
+                           than normal with regular client traffic.
+               OFF       - Forces High Traffic Mode OFF.
+               TO <rate> - Sets the High Traffic Mode <rate>. Ignite will automatically go
+                           into High Traffic Mode once <rate> is reached, and will automatically turn
+                           it off when things calm down.
+               QUIET     - When set, Ignite will not notify Opers/Admins when it goes into and out of High
+                           Traffic Mode.
+               NOISY     - When set, Ignite will notify Opers/Admins when it goes into and out of High
+                           Traffic Mode.
+  KILL     - KILL <nick> [reason]
+             Removes <nick> from your network with [reason].
++ KLINE    - KLINE <nick|user@host> :[reason]
+             Adds a KLINE to ircd.conf or klines.conf which
+             will ban the specified user from using that server.
+             The banned client will receive a message saying they are banned with [reason].
+             The reason can contain a '|' character.  Anything before the '|' will be shown
+             to the victim, anything after will not.
+             For a temporary KLINE, length of KLINE is given in minutes as the first parameter:
+             KLINE 10 <nick|user@host> :Banned 10 minutes
++ LOCOPS   - LOCOPS :<message>
+             Sends <message> to all Opers/Admins on local server with UMODE +w and +z.
++ LTRACE   - LTRACE [server|nick]
+             Displays only Oper/Admin and server information.
++ LWALLOPS - LWALLOPS :<message>
+             Sends <message> to all Opers/Admins on local server with UMODE +w and +z.
++ OPERWALL - OPERWALL :<message>
+             Sends <message> to all Opers/Admins who are UMODE +w and +z.
+  REHASH   - REHASH [option]
+             When no [option] is given, Ignite will re-read ircd.conf.
+             [option] can be one of the following:
+               DNS     - Read /etc/resolv.conf
+               IP      - Reloads the IP hash for improved ACKPATCH
+               TKLINES - Clears temporary KLINEs
+               GLINES  - Clears G: Lines
+               GC      - Performs garbage collecting of excess memory
+               MOTD    - Reloads MOTD
+               OMOTD   - Reloads Oper MOTD
+               HELP    - Reloads this help file
+               DLINES  - Reloads D: Lines
+  RESTART  - RESTART
+             Restarts the IRC server.
++ SET      - SET <option> <value>
+             <option> can be one of the following:
+               LOG        - Sets the logging level for what is logged to ircd.log.
+               MAX        - Sets the number of max connections to <value>.
+                            This number cannot exceed HARD_FDLIMIT in config.h!
+               -- The following is if compiled with FLUD --
+               FLUDNUM    - Sets the number of flud messages to
+                            trip flud alarm to <value>.
+               FLUDTIME   - Sets the number of seconds in which
+                            FLUDNUM msgs must occur to <value>.
+               FLUDBLOCK  - Sets the number of seconds to block
+                            fluds to <value>.
+               -- The following is if compiled with NO_JOIN_ON_SPLIT --
+               SPLITDELAY - Sets how long after the connect burst
+                            starts before ops can be hacked on new
+                            channels. 5(minutes) is usually plenty.
+                            Disable using 0.
+               SMALLNET   - Below this number of servers present
+                            means special split handling is now on.
+               -- The following is if compiled with ANTI_SPAMBOT --
+               SPAMNUM   - Sets how many join/parts to channels
+                           constitutes a possible spambot.
+               SPAMTIME  - Below this time on a channel
+                           counts as a join/part as above.
+  SQUIT    - SQUIT <server> [reason]
+             Splits <server> away with [reason].
+  STATS    - STATS <letter> [server|nick]
+             Queries server [server] for information on <letter>.
+             LETTER can be defined as: ('*' oper only, '^' can be configured for oper only)
+               c^ - Shows C/N: Lines
+               d* - Shows D: Lines
+               f* - Shows channel/TS statistics
+               g* - Shows G: Lines
+               h^ - Shows H/L: Lines
+               i^ - Shows I: Lines
+               K^ - Shows K: Lines (or matched KLINEs)
+               k^ - Shows temporary K: Lines (or matched temp KLINEs)
+               L  - Shows IP and generic info about [nick]
+               l  - Shows hostname and generic info about [nick]
+               m  - Shows commands and their usage
+               o^ - Shows O/o: Lines
+               P^ - Shows configured ports
+               p  - Shows opers and admins connected and their idle times
+               Q* - Shows quarantined nicks and channels
+               q* - Shows locally juped channels (mode +j)
+               r* - Shows resource usage by ircd
+               s* - Shows server cache
+               t* - Shows generic server stats
+               U* - Shows U: Lines
+               u  - Shows server uptime
+               v* - Shows connected servers and their idle times
+               x* - Shows X: Lines
+               y* - Shows Y: Lines
+               z* - Shows memory stats
+               ?  - Shows connected servers and SENDQ info about them
++ TESTLINE  - TESTLINE <user@host>|<IP>
+              Looks up <user@host> or <IP> and returns information on relevant
+              I: or K: Lines for <user> or D: Lines on <IP>.
+  TRACE     - TRACE [server|nick]
+              Displays information on clients and servers.
++ UNDLINE   - UNDLINE <IP>
+              Will attempt to UNDLINE <IP>.
++ UNGLINE   - UNGLINE <user@host>
+              -- If compiled with GLINE --
+              Will attempt to remove GLINE matching <user@host>.
+              This will only remove the GLINE from YOUR server. It will NOT remove it globally.
++ UNKLINE   - UNKLINE <user@host>
+              Will attempt to UNKLINE <user@host>.
++ WALLOPS   - WALLOPS :<message>
+              Sends <message> to all users set UMODE +w and +z.

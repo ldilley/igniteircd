@@ -1,0 +1,92 @@
+$Id: TS5,v 1.1.1.1 2006/03/08 23:28:05 malign Exp $
+
+  Overview of the TS5 system
+  Lee H <lee@leeh.co.uk>
+
+For the purposes of this document, ircd versions:
+  hybrid6.0
+  ircd-comstud-1.12
+  CSr31pl4
+
+and prior, are TS3.
+
+Ignite and Hybrid 6.1 are TS5.
+
+The difference between TS5 and TS3 is what happened on opless channels.  TS
+works by establishing which server has the oldest version of the channel,
+the version that is oldest, keeps its modes and ops, the version that is
+youngest, removes their modes and ops, and accepts the older version.
+
+There was an exception to this rule with opless channels, if a channel was
+opless, TS3 would allow anybody to keep their ops and modes on the channel.
+TS5 aims to stop this, by removing this exception.
+
+Example1: 
+
+An irc network, with server A (every server is ts3)
+
+UserA is on ServerA, in channel #broken.  This channel is opless, and has a
+TS of 800000000.  ServerA splits, and whilst it is split, UserA cycles
+channel #broken, recreates the channel and is given ops.  On ServerA #broken
+now has a TS of 900000000 and has ops.  ServerA rejoins with the network,
+via HubB.  HubB realises #broken is opless, so allows UserA to retain ops.
+The TS is moved forward to 900000000.
+
+The network now sees #broken as having a TS of 900000000, with UserA being
+opped.
+
+Example2:
+
+An irc network, with server C (every server is ts5)
+
+Same scenario as above.  ServerC splits and UserC cycles channel #broken,
+recreating it with a TS of 900000000.  ServerC rejoins with the network via
+HubD.  HubD realises #broken has a TS of 800000000 locally, and ServerC is
+showing a TS of 900000000, it ignores ServerC's modes and ops.  The channel
+remains opless.  ServerC receives HubD's modes, and it notices HubD has a
+lower TS of channel #broken.  It removes UserC's ops, removes the channel
+modes on #broken, and accepts HubD's status.
+
+The network version of #broken hasn't changed.  It is still opless, with a TS
+of 800000000.
+
+
+As you can see, TS5 makes splitting a server to regain ops useless, as it
+cannot be abused to give ops after a netsplit.
+
+The problem with TS5 however, is what happens on a mixed TS5/TS3 network.
+Channels where the older TS has ops will behave the same way on TS5 and TS3,
+however an opless channel will behave differently, as you can see above.
+
+The result of TS5/TS3 mixed can be a desync:
+
+Example1:
+
+As per Example1 above, except the rest of the network is TS5, ServerA is
+TS3.  ServerA would keep its modes and ops, whilst the rest of the network
+would remove them.  This means only ServerA would see UserA as opped.  The
+desync can be abused, as UserA can send modes.  Hybrid6.0 servers will
+accept these modes from the unopped client, so if UserA ops UserB, who then
+ops UserA, the channel will be the same across all Hybrid6.0 and Hybrid6.1
+servers.
+
+Example2:
+
+As per Example2 above, except the rest of the network is TS3.  ServerC is
+TS5.  ServerC would remove its modes and ops, therefore UserC would not be
+opped on ServerC, therefore it could not send any mode changes to the
+channel.  Although it is opped elsewhere, it isn't opped locally, so the
+desync cannot be abused.
+
+As you can see, the desync's that can occur can either be resynced, or are
+useless to the user, so a mixed TS5/TS3 network is not a huge problem,
+although a desync is NOT a good thing to have.
+
+We have jumped to TS5 from TS3, because there was a version of ircd that was
+TS4, so it was thought better to avoid a clash with an existing version.
+
+The ircd-hybrid team recommend TS5 is enabled on your network, if the full
+network is upgrading to TS5 versions, then the desync problem will be short
+lived, as once a full network has upgraded, there will be no desync.
+
+EOF

@@ -1,0 +1,25 @@
+# $Id .depend,v 0.0 2001/12/09 17:37:18 lusky Exp $
+check.o: check.c internal.h ../include/config.h ../include/setup.h \
+ adns.h ../include/irc_string.h ../include/ircd_defs.h dlist.h
+event.o: event.c internal.h ../include/config.h ../include/setup.h \
+ adns.h ../include/irc_string.h ../include/ircd_defs.h dlist.h \
+ tvarith.h
+general.o: general.c ../include/fileio.h ../include/s_log.h \
+ /usr/include/memory.h internal.h ../include/config.h \
+ ../include/setup.h adns.h ../include/irc_string.h \
+ ../include/ircd_defs.h dlist.h
+parse.o: parse.c internal.h ../include/config.h ../include/setup.h \
+ adns.h ../include/irc_string.h ../include/ircd_defs.h dlist.h
+poll.o: poll.c internal.h ../include/config.h ../include/setup.h \
+ adns.h ../include/irc_string.h ../include/ircd_defs.h dlist.h
+query.o: query.c internal.h ../include/config.h ../include/setup.h \
+ adns.h ../include/irc_string.h ../include/ircd_defs.h dlist.h
+reply.o: reply.c internal.h ../include/config.h ../include/setup.h \
+ adns.h ../include/irc_string.h ../include/ircd_defs.h dlist.h
+setup.o: setup.c internal.h ../include/config.h ../include/setup.h \
+ adns.h ../include/irc_string.h ../include/ircd_defs.h dlist.h
+transmit.o: transmit.c internal.h ../include/config.h \
+ ../include/setup.h adns.h ../include/irc_string.h \
+ ../include/ircd_defs.h dlist.h tvarith.h
+types.o: types.c internal.h ../include/config.h ../include/setup.h \
+ adns.h ../include/irc_string.h ../include/ircd_defs.h dlist.h

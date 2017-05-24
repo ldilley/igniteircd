@@ -1,0 +1,445 @@
+#!/bin/sh
+#
+# $Id: mkconf,v 1.1.1.1 2006/03/08 23:28:14 malign Exp $
+# Copyright (C) 1999 Patrick Alken
+#
+# Usage: ./mkconf [options]
+#
+# Options:
+#   --path=<dir>       : Location of ircd.conf/mkpasswd files
+#   --quick            : Quick setup, no questions
+#   --addo             : Add an O: line
+#   --addy             : Add a Y: line
+#   --addp             : Add a P: line
+
+# Initialize some variables
+Path="."
+ConfFile="$Path/ircd.conf"
+MkPass="$Path/mkpasswd"
+Quick="0"
+Input=""
+
+# Various functions
+
+# GetInput
+#  Ask user string $1 until they give a valid response ($2)
+# Default response: $3
+# Stores response in: Input
+GetInput ()
+{
+  okinput=0
+  while [ $okinput -eq 0 ]; do
+    if test -n "$3"; then
+      echo -n "$1 [$3] "
+    else
+      echo -n "$1"
+    fi
+    read Input
+    if test ! -n "$Input"; then
+      Input="$3"
+    fi
+
+    if test ! -n "$2"; then
+      # $2 is blank, any response is valid
+      okinput=1
+    else
+      for tmp in $2; do
+        if test "$tmp" = "$Input"; then
+          okinput=1
+          break
+        fi
+      done
+    fi
+
+    if test ! "$okinput" = "1"; then
+      echo "Valid responses are: $2"
+    fi
+  done
+  return 1
+}
+
+AddMline ()
+{
+  GetInput "Enter the name of your server: " "" ""
+  ServerName="$Input"
+  GetInput "Are you using a virtual host?" "y n" "n"
+  case "$Input" in
+    y* | Y*)
+      GetInput "  Enter virtual hostname/ip: " "" ""
+      Vhost="$Input"
+    ;;
+    *)
+      Vhost="*"
+    ;;
+  esac
+  GetInput "Enter a description of your server: " "" ""
+  ServerDesc="$Input"
+
+  echo "M:$ServerName:$Vhost:$ServerDesc:" >> $ConfFile
+  return 1
+}
+
+AddAline ()
+{
+  GetInput "Line 1: " "" ""
+  Line1="$Input"
+  GetInput "Line 2: " "" ""
+  Line2="$Input"
+  GetInput "Line 3: " "" ""
+  Line3="$Input"
+
+  echo "A:$Line1:$Line2:$Line3" >> $ConfFile
+  return 1
+}
+
+AddYline ()
+{
+  stop=0
+  classcnt=0
+  while [ $stop -eq 0 ]; do
+    classcnt=`expr $classcnt + 1`
+
+    GetInput "Enter any positive integer for the class identifier" "" "$classcnt"
+    Class="$Input"
+    GetInput "Enter the delay (in seconds) between server pings to this client" "" "90"
+    PingFreq="$Input"
+    GetInput "Enter the delay (in seconds) between connection attempts (if a server class)" "" "300"
+    ConnFreq="$Input"
+    GetInput "Enter the maximum number of connections a client from this class can have at any one time" "" "10"
+    MaxConn="$Input"
+    GetInput "Enter the size of the SendQ for this client (servers should be 4mb or more)" "" "100000"
+    SendQ="$Input"
+
+    echo "Y:$Class:$PingFreq:$ConnFreq:$MaxConn:$SendQ" >> $ConfFile
+
+    GetInput "Configure another Y: line?" "y n" "n"
+    case "$Input" in
+      n* | N*)
+        stop=1
+      ;;
+    esac
+  done
+
+  return 1
+}
+
+AddIline ()
+{
+  stop=0
+  while [ $stop -eq 0 ]; do
+    GetInput "Enter password that clients must supply, or leave blank for none: " "" ""
+    IPass="$Input"
+    GetInput "Enter hostmask that clients must match in order to connect" "" "*@*"
+    IMask="$Input"
+    GetInput "Enter connection class that will identify the client" "" "1"
+    IClass="$Input"
+
+    echo "I:NOMATCH:$IPass:$IMask::$IClass" >> $ConfFile
+
+    GetInput "Configure another I: line?" "y n" "n"
+    case "$Input" in
+      n* | N*)
+        stop=1
+      ;;
+    esac
+  done
+
+  return 1
+}
+
+AddPline ()
+{
+  stop=0
+  while [ $stop -eq 0 ]; do
+    GetInput "Enter an ip address to bind this port to, or leave blank if none: " "" ""
+    PAddr="$Input"
+    GetInput "Enter port number to listen on" "" "6667"
+    PPort="$Input"
+
+    echo "P::$Paddr::$PPort" >> $ConfFile
+
+    GetInput "Configure another P: line?" "y n" "n"
+    case "$Input" in
+      n* | N*)
+        stop=1
+      ;;
+    esac
+  done
+
+  return 1
+}
+
+AddOline ()
+{
+  stop=0
+  while [ $stop -eq 0 ]; do
+    GetInput "Would you like this operator to have global access to the network?" "y n" "y"
+    case "$Input" in
+      y* | Y*)
+        Okey="O"
+      ;;
+      n* | N*)
+        Okey="o"
+      ;;
+    esac
+    GetInput "Enter hostmask for operator" "" "*@*"
+    OMask="$Input"
+    cat << EOF
+
+You must now use the "mkpasswd" utility to encrypt a password
+that the operator will be required to use.
+EOF
+    GetInput "Enter password (encrypted): " "" ""
+    OPass="$Input"
+    GetInput "Enter nickname for operator: " "" ""
+    ONick="$Input"
+    GetInput "Enter connection class that will identify the operator" "" "1"
+    OClass="$Input"
+
+    echo "$Okey:$OMask:$OPass:$ONick::$OClass" >> $ConfFile
+
+    GetInput "Configure another O: line?" "y n" "n"
+    case "$Input" in
+      n* | N*)
+        stop=1
+      ;;
+    esac
+  done
+
+  return 1
+}
+
+AddCNline ()
+{
+  stop=0
+  while [ $stop -eq 0 ]; do
+    GetInput "Enter the *IP ADDRESS* of the server: " "" ""
+    CIp="$Input"
+    GetInput "Enter password for link (plaintext): " "" ""
+    CPass="$Input"
+    GetInput "Enter server name: " "" ""
+    CName="$Input"
+    GetInput "Would you like to autolink to this server?" "y n" "n"
+    case "$Input" in
+      y* | Y*)
+        GetInput "  Enter port for autolinking" "" "6667"
+        CPort="$Input"
+      ;;
+      n* | N*)
+        CPort=""
+      ;;
+    esac
+    GetInput "Enter connection class that will identify the server" "" "1"
+    CClass="$Input"
+
+    echo "C:$CIp:$CPass:$CName:$CPort:$CClass" >> $ConfFile
+    echo "N:$CIp:$CPass:$CName::$CClass" >> $ConfFile
+
+    GetInput "Configure another set of C/N lines?" "y n" "n"
+    case "$Input" in
+      n* | N*)
+        stop=1
+      ;;
+    esac
+  done
+
+  return 1
+}
+
+# Parse the command line arguements
+
+for arg in "$@"; do
+  # Check if they gave an arguement like: --path=/path
+  # If so, store "/path" into target
+  case "$arg" in
+    -*=*)
+      target=`echo "$arg" | sed 's/[-_a-zA-Z0-9]*=//'`
+    ;;
+    *)
+      target=
+    ;;
+  esac
+
+  case "$arg" in
+    -p | --path | --pat | --pa | --p)
+      echo "Error: no path given"
+      exit 1
+    ;;
+    -p=* | --path=* | --pat=* | --pa=* | --p=*)
+      Path="$target"
+      ConfFile="$Path/ircd.conf"
+    ;;
+    -q | --quick | --quic | --qui | --qu | --q)
+      Quick="1"
+    ;;
+    --addo | -o)
+      AddOline
+      exit 0
+    ;;
+    --addy | -y)
+      AddYline
+      exit 0
+    ;;
+    --addi | -i)
+      AddIline
+      exit 0
+    ;;
+    --addp | -p)
+      AddPline
+      exit 0
+    ;;
+    --addc | -c)
+      AddCNline
+      exit 0
+    ;;
+    -h | --help | --hel | --he | --h)
+      cat << EOF
+Usage: mkconf [options]
+
+Options:
+  --path=DIR        Search for ircd.conf in DIR [default: $Path]
+  --quick           Quick setup - no questions asked
+  --addo            Add an operator (O:) line to ircd.conf
+  --addy            Add a class (Y:) line to ircd.conf
+  --addi            Add an authorization (I:) line to ircd.conf
+  --addp            Add a port (P:) line to ircd.conf
+  --addc            Add a set of server linking (C/N) lines to ircd.conf
+EOF
+      exit 0
+    ;;
+  esac
+done
+
+if test -w "$ConfFile"; then
+  GetInput "$ConfFile exists, delete it?" "y n" "n"
+  case "$Input" in
+    y* | Y*)
+      rm -f $ConfFile
+    ;;
+    n* | N*)
+      exit 1
+    ;;
+  esac
+fi
+
+echo "Creating $ConfFile"
+echo "# ircd.conf - created $(date '+%a %b %d %Y %T')" > $ConfFile
+
+if test "$Quick" = "1"; then
+  # Quick configuration, just output a bunch of defaults
+  cat >> $ConfFile << EOF
+M:irc.myserver.com:*:My Server:
+A:Administrator:Location:Email - irc@myserver.com
+
+# Connection classes
+Y:1:90:300:10:1000000
+
+# Authorization lines
+I:NOMATCH::*@*::1
+
+# Port lines
+P::::6667
+EOF
+
+  exit 0
+fi
+
+echo ""
+
+# Now, the interactive configuration
+
+# Setup the M: line
+AddMline
+
+echo ""
+
+# Setup the A: line
+cat << EOF
+You will now be required to enter three lines of administrative
+information. This is what will show up in the /admin command.
+EOF
+
+AddAline
+
+# Setup Y: lines
+cat << EOF
+
+You must now configure at least one Y: line. Y: lines define
+connection classes. Each client/server is given a certain class
+which configures several properties for that client/server.
+
+EOF
+
+cat >> $ConfFile << EOF
+
+# Connection classes
+EOF
+
+AddYline
+
+# Setup I: lines
+cat >> $ConfFile << EOF
+
+# Authorization lines
+EOF
+
+cat << EOF
+
+You must now configure at least one I: line, or no one will
+be able to connect to your shiny new hybrid server. :-)
+I: lines specify hostmasks that are allowed to connect to
+your server. You may also require a password for clients
+if you wish.
+
+EOF
+
+AddIline
+
+# Setup P: lines
+cat >> $ConfFile << EOF
+
+# Port lines
+EOF
+
+cat << EOF
+
+You must now configure at least one P: line, or hybrid will
+not accept any connections from anybody. P: lines specify
+ports that hybrid will listen on for incoming connections.
+
+EOF
+
+AddPline
+
+# Setup O: lines
+echo ""
+
+GetInput "Would you like to add operators at this time?" "y n" "y"
+case "$Input" in
+  y* | Y*)
+    cat >> $ConfFile << EOF
+
+# Operators
+EOF
+    AddOline
+  ;;
+esac
+
+# Setup C/N lines
+echo ""
+
+GetInput "Would you like to add server linking lines at this time?" "y n" "n"
+case "$Input" in
+  y* | Y*)
+    cat >> $ConfFile << EOF
+
+# Server linking lines
+EOF
+    AddCNline
+  ;;
+esac
+
+echo ""
+echo "Configuration of $ConfFile is now complete"
+echo ""
+

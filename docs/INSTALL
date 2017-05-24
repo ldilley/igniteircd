@@ -1,0 +1,12 @@
+$Id: INSTALL,v 1.1.1.1 2006/03/08 23:28:04 malign Exp $
+
+Ignite IRCd install process:
+----------------------------
+
+1.) Run the configure script so we can collect some information about your system.
+       ./configure
+2.) Edit "include/config.h" to define/undefine features and settings of Ignite.
+3.) Execute "make" to build Ignite.
+4.) Execute "make install" to install Ignite to the path defined in config.h (DPATH).
+5.) Edit ircd.conf to suit your needs.
+6.) Launch the Ignite ircd executable and enjoy. =)

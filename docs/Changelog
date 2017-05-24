@@ -1,0 +1,112 @@
+$Id: Changelog,v 1.6 2007/02/15 06:06:41 malign Exp $
+
+Ignite IRCd Changelog:
+
+Ignite 0.9.32
+1.) Added: Global IRC Operators may now manipulate channel modes, topic setting, kick, and set bans without channel mode +o.
+2.) Changed: Increased NICKLENGTH from 9 characters to 30.
+3.) Changed: Increased TOPICLENGTH from 120 characters to 256 characters. 
+4.) Added: Denied kicking of Global IRC Operators from channels.
+5.) Added: New documentation.
+6.) Changed: NICKNAMEHISTORYLENGTH from 15000 to 1000.
+7.) Changed: MAXSENDQLENGTH from 5050000 to 500000.
+8.) Changed: INITIAL_DBUFS from 4000 to 300.
+9.) Added: Global IRC Operators may join channels despite modes set against them (+b/+l/+i/+k).
+10.) Added: Denied setting -o against Global IRC Operators when they are +o.
+11.) Changed: MAXCHANNELSPERUSER from 20 to 10.
+12.) Changed: MAXMODEPARAMS from 4 to 5.
+13.) Changed: Version information to Ignite related text.
+14.) Changed: Authentication messages.
+15.) Removed: messages_cust.tab
+16.) Added: IRC Operator notices when a Global IRC Operator changes modes within a channel they are not +o on.
+17.) Changed: Sample IRC configuration has new descriptions, syntax, and examples of directives.
+18.) Removed: Ignore server modes +ovh.
+19.) Fixed: Issue with bans not working due to returning null to an int function opposed to 0.
+20.) Added: Optional kqueue() support for a small performance increase on FreeBSD platforms.
+21.) Added: FJOIN (Force Join) command.
+22.) Fixed: Local IRC Operators no longer have the super privileges Global IRC Operators do.
+23.) Added: Ignite+TS Protocol so non-Ignite servers can no longer connect due to network synchronization issues.
+24.) Removed: serno.h no need for a serial number.
+25.) Changed: patchlevel.h to version.h.
+
+Ignite 0.9.33
+26.) Removed: syslog() support. Who the hell uses this?
+27.) Fixed: warning: conflicting types for built-in function 'log' message during compilation.
+28.) Changed: Simplified logging system.
+29.) Changed: Log timestamping to US format (MM/DD/YY).
+30.) Changed: USE_LOGFILE to LOGGING in include/config.h.
+31.) Added: Failed OPER attempts are now logged to the logfile when LOGGING is defined.
+32.) Added: KILL command use is now logged to the logfile when LOGGING is defined.
+33.) Added: HTM ON/OFF/TO is now logged to the logfile when LOGGING is defined.
+34.) Added: GLINE requests and additions are now logged to the logfile when LOGGING is defined.
+35.) Added: Global IRC Operators setting modes within a channel without +o is logged to the logfile when LOGGING is defined.
+36.) Added: FNICK (Force Nick) command.
+37.) Changed: /quote help output is now formatted better.
+38.) Added: Global IRC Operators can now kick clients from a channel without having channel operator status (+o).
+39.) Changed: Global IRC Operators are now known as IRC Administrators.
+40.) Changed: Local IRC Operators are now known as IRC Operators.
+41.) Changed: IRC Administrator UMODE to +a.
+42.) Changed: IRC Operator UMODE to +o.
+43.) Added: RPL_WHOISADMIN for IRC Administrators.
+44.) Fixed: IRC Administrators can now remove channel operator status (+o) from themselves.
+45.) Added: Disallowed the use of KILL against IRC Administrators.
+46.) Added: Disallowed the use of KLINE against IRC Administrators.
+47.) Added: IRC Administrators are now automatically set mode +o by the server on channel join.
+48.) Added: Mode char 'a' with mode flag '*' to designate IRC Administrators within channels.
+49.) Added: IRC Administrators are now automatically set mode +a by the server on channel join.
+50.) Changed: opers.txt to opers.help.
+51.) Fixed: IRC Administrators can now +a/-a themselves only.
+52.) Added: New compile optimizations in Makefile.
+53.) Changed: Updated UMODE chars in related help files.
+54.) Changed: SendMessageFile date to US format (MM/DD/YY).
+
+Ignite 0.9.4
+55.) Added: "realhost" member to client structure so the true client host/IP is never lost when it is overwritten.
+56.) Fixed: FNICK now verifies given nickname parameter is valid.
+57.) Added: Use of FNICK is now logged to ircd.log.
+58.) Added: FNICK notice to client that their nick was changed and by who.
+59.) Added: Notice sent to all IRC Operators/Administrators when FNICK is used. 
+60.) Removed: a/* channel mode/flag as they caused issues with certain clients and bots that failed to recognize them even when defined in PREFIX.
+61.) Fixed: FJOIN now verifies channel exists and if not creates it when used.
+62.) Added: Use of FJOIN is now logged to ircd.log.
+63.) Added: FJOIN notice to client that they have been forced to join specified channel and by who.
+64.) Added: Notice sent to all IRC Operators/Administrators when FJOIN is used.
+65.) Added: Startup messages are now logged for easy detection of problems.
+66.) Changed: ZIP_LINKS is now undefined by default.
+67.) Changed: ZIP_LEVEL is no longer enabled unless ZIP_LINKS is defined.
+68.) Changed: GLINES is now undefined by default.
+69.) Changed: GLINEFILE and GLINE_TIME are no longer enabled unless GLINES is defined.
+70.) Added: Channel mode 'r' to signify a channel registered with services.
+71.) Added: CHANMODE_R to config.h for channel mode 'r' (registered) for use with ChanServ.
+
+Ignite 0.9.41
+72.) Fixed: FJOIN command causing a segfault with glibc.so.6.
+73.) Fixed: FJOIN now makes use of SJOIN opposed to vanilla JOIN so TS no longer warns of remote joins on channel creation.
+74.) Changed: CHANMODE_R in config.h to SERVICES.
+75.) Changed: FLAGS_REJ no longer exists. It has been combined with FLAGS_CCON.
+76.) Added: User mode 'r' now signifies nickname is registered with NickServ when SERVICES is defined.
+77.) Changed: RPL_WHOISADMIN from numeric 320 to 308 to standardize some. 320 is now NULL. (Bahamut)
+78.) Added: RPL_WHOISREGNICK tied to numeric 307 to signify nickname is registered with NickServ. (Bahamut and Unreal)
+79.) Added: Q: lines for services bots in sample configuration file for obvious security reasons.
+
+Ignite 0.9.42
+73.) Fixed: FNICK now verifies the given nickname is not in use before changing it; preventing a forced collision.
+74.) Added: FNICK is now definable in config.h.
+75.) Added: FJOIN is now definable in config.h.
+76.) Fixed: Initialized undefined pointers to NULL.
+77.) Changed: HUB is now undefined by default in config.h.
+78.) Changed: Default package directory/binary name to "igniteircd" (removed previous hyphenated name). 
+
+Ignite 0.9.43
+76.) Changed: 'docs' directory to 'doc', was failing on make install (thanks to Tonster).
+77.) Fixed: source is now ANSI compliant
+78.) Added: -ansi, -pedantic and -Wall to Makefile.in
+79.) Added: -fno-strict-aliasing to Makefile.in to quell dereferencing type-punned pointer warnings.
+80.) Fixed: Many compile warnings.
+81.) Removed: Unused functions and variables.
+82.) Changed: version.h updated to reflect version 0.9.43.
+
+Ignite 0.9.44
+83.) Fixed: send_queued function violating strict aliasing rules by casting a reference of an int as a pointer to size_t.
+
+Last updated: February 14, 2007

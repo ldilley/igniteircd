@@ -1,0 +1,36 @@
+$Id: ConnectFlags,v 1.1.1.1 2006/03/08 23:28:04 malign Exp $
+
+Special characters used with I: lines in ircd.conf:
+
+   -  This will never put a '~' for a user not running identd
+   +  This will force people matching this I: to require identd
+   !  This means to only allow 1 connection per IP address in this I:
+   $  (Not used in Ignite)
+   ^  This will exempt a user from K/G: lines (limited protection from D: lines)
+   &  User can run bots
+   >  This user is exempt from I: line/server side connection limits
+   _  This user is exempt from G: lines
+   =  Spoof this user's IP (normally only used for opers)
+   <  This user is exempt from idle restrictions if IDLE_CHECK is defined
+
+Allow X connection(s) per IP for users @somedomain.net where X is provided in the Y: line
+If there is no '!' and you have a limit in your Y: line, then it matches the full user@host instead of just host.
+I:X::!*@somedomain.net::1
+
+Never show a '~' even though user is not running identd
+I:X::-*@somedomain.net::1
+
+User is exempt from K/G: lines
+I:NOMATCH::^user@somedomain.net::3
+
+User can run a bot and is also E: lined
+I:NOMATCH::&user@somedomain.net::3
+
+User is immune from I: line limites
+I:NOMATCH::>user@somedomain.net::3
+
+User can run a bot and is exempt from client connection limits
+I:NOMATCH::^&>user@somedomain.net::3
+
+Show this user as being user@spoofed.org
+I:spoofed.org::=user@somedomain.net::3

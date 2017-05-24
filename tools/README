@@ -1,0 +1,14 @@
+$Id: README,v 1.1.1.1 2006/03/08 23:28:14 malign Exp $
+
+A directory of support programs for ircd.
+
+fixklines.c  - converts 192.168.0.* k-lines and d-lines into CIDR notation
+install_ircd - internal script used for make install
+ircd_start.c - start program for Solaris
+klineParse.c - cleans out redundant klines
+mkconf       - a simple but effective script to edit ircd.conf lines
+mkpasswd     - makes password for O: lines
+start_ircd.c - start program for FreeBSD and BSD/OS systems
+untabify     - a script used by the developers
+viconf       - edit your conf file without having to chdir su etc. etc.
+               also locks the file if file locking is used.

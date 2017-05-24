@@ -1,0 +1,16 @@
+$Id: Tuning,v 1.1.1.1 2006/03/08 23:28:05 malign Exp $
+
+  Ignite is configured to serve approximately 100 clients out of the box. This is adjustable to suit the needs of
+your network. Most average personal servers do not see more than 100 simultaneous clients hence the stock setting.
+
+  You can easily tune your Ignite IRCd to use less memory on startup by modifying the "list.c" source module in /src. 
+
+These two macros will be found in "list.c".
+
+#define LINK_PREALLOCATE 128
+
+#define CLIENTS_PREALLOCATE 128
+
+  You may modify these numbers to fit your estimated
+needs. You could use 64 for each for example, on a server that 
+normally never saw more than 60 clients on the entire network.

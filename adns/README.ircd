@@ -1,0 +1,9 @@
+
+The files in adns/ were borrowed from the ADNS library and modified quite
+heavily.  The original code's copyright notices are in adns/README and
+adns/COPYING.  
+
+The modified portions are Copyright 2001 Aaron Sethman <androsyn@ratbox.org>
+
+
+ 

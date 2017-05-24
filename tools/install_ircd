@@ -1,0 +1,161 @@
+#!/bin/sh
+# IRCD INSTALL SCRIPT
+# $Id: install_ircd,v 1.1.1.1 2006/03/08 23:28:14 malign Exp $
+#
+# Completely re-written by FlashMan <chuegen@quadrunner.com> 981231
+# Wow.  The old version was *very* messy and had boatloads of redundancy.
+# Fixed.
+#
+
+# Path to install-sh
+INSTALL_SH="autoconf/install-sh"
+
+#
+# dir_concat looks to see if we have an absolute or relative path
+# it echos $DPATH/<arg> if we have a relative path
+#
+dir_concat() {
+  if [ ! -z "`echo $1 | grep '^/'`" ]; then
+    echo $1;
+  else
+    echo ${DPATH}$1;
+  fi;
+}
+
+#
+# dir_make attempts to make a directory tree using mkdir -p
+# Used to eliminate redundancy
+#
+dir_make() {
+  if [ \( ! -z "$1" \) -a \( ! -d "$1" \) ]; then
+    echo $1 does not exist, creating...
+    mkdir -p $1
+    if [ $? -ne 0 ]; then
+      echo Could not create directory path $1.
+      echo Perhaps you are not allowed to create a directory in the path.
+      echo Please fix and try again.
+      exit -1;
+    fi;
+  fi
+}
+
+DPATH=`grep '#define.DPATH' include/config.h|awk '{print $3}'|tr -d \"`;
+SPATH=`grep '#define.SPATH' include/config.h|awk '{print $3}'|tr -d \"`;
+CPATH=`grep '#define.CPATH' include/config.h|awk '{print $3}'|tr -d \"`;
+KPATH=`grep '#define.KPATH' include/config.h|awk '{print $3}'|tr -d \"`;
+MPATH=`grep '#define.MPATH' include/config.h|awk '{print $3}'|tr -d \"`;
+LPATH=`grep '#define.LPATH' include/config.h|awk '{print $3}'|tr -d \"`;
+PPATH=`grep '#define.PPATH' include/config.h|awk '{print $3}'|tr -d \"`;
+HPATH=`grep '#define.HPATH' include/config.h|awk '{print $3}'|tr -d \"`;
+
+SPATH=`dir_concat ${SPATH}`;
+CPATH=`dir_concat ${CPATH}`;
+KPATH=`dir_concat ${KPATH}`;
+MPATH=`dir_concat ${MPATH}`;
+LPATH=`dir_concat ${LPATH}`;
+PPATH=`dir_concat ${PPATH}`;
+HPATH=`dir_concat ${HPATH}`;
+
+#   DPATH = directory,
+#   SPATH = server executable,
+#   CPATH = conf file,
+#   MPATH = MOTD
+#   KPATH = kline conf file
+#   leave KPATH undefined if you want klines in main conf file
+#   HPATH is the opers help file, seen by opers on /quote help
+
+# Let's make sure $DPATH exists
+dir_make ${DPATH}
+
+if [ -f src/ircd.exe ]; then
+  EXESUFFIX=".exe"
+else
+  EXESUFFIX=""
+fi
+
+# try to install their ircd.conf file, unless it already exists.
+# install ircd, save old one as ircd.old
+dir_make `dirname ${SPATH}`
+if [ ! -f ${SPATH}${EXESUFFIX} ]; then
+  echo installing ircd as ${SPATH}${EXESUFFIX}
+  $INSTALL_SH -c src/ircd${EXESUFFIX} ${SPATH}${EXESUFFIX};
+else
+  echo installing ircd as ${SPATH}${EXESUFFIX}
+  echo previous ircd saved as ircd${EXESUFFIX}.old
+  mv ${SPATH}${EXESUFFIX} ${SPATH}${EXESUFFIX}.old
+  $INSTALL_SH -c src/ircd${EXESUFFIX} ${SPATH}${EXESUFFIX};
+fi
+
+dir_make `dirname ${CPATH}`
+if [ ! -f ${CPATH} ]; then
+  echo installing example.conf as ${CPATH}
+  $INSTALL_SH -c doc/example.conf ${CPATH};
+else
+  echo You already have ${CPATH}.;
+fi
+
+# try to install their motd file, unless it already exists.
+dir_make `dirname ${MPATH}`
+if [ ! -f ${MPATH} ]; then
+  echo installing a sample MOTD in ${MPATH}
+  echo "This is ircd-hybrid MOTD replace it with something better" > ${MPATH};
+else
+  echo You already have an MOTD in ${MPATH}.;
+fi
+
+# try to install their kpath file unless it already exists.
+dir_make `dirname ${KPATH}`
+if [ ! -f ${KPATH} ]; then
+  echo touching K-line file ${KPATH}
+  touch ${KPATH};
+else
+  echo You already have a K-line file in ${KPATH}.;
+fi
+
+# try to install their opers.help file, in all cases 
+dir_make `dirname ${HPATH}`
+if [ ! -f ${HPATH} ]; then
+  echo installing opers.help as ${HPATH}
+  $INSTALL_SH -c opers.help ${HPATH};
+else
+   echo installing opers.help as ${HPATH}
+   echo previous opers.help saved as opers.help.old
+   mv ${HPATH} ${HPATH}.old
+   $INSTALL_SH -c opers.help ${HPATH};
+fi
+
+# install mkpasswd
+if [ ! -f ${DPATH}mkpasswd ]; then
+  echo installing mkpasswd as ${DPATH}mkpasswd${EXESUFFIX}
+  $INSTALL_SH -c tools/mkpasswd${EXESUFFIX} ${DPATH}mkpasswd${EXESUFFIX};
+else
+   echo installing mkpasswd as ${DPATH}mkpasswd${EXESUFFIX}
+   echo previous mkpasswd saved as mkpasswd${EXESUFFIX}.old
+   mv ${DPATH}mkpasswd${EXESUFFIX} ${DPATH}mkpasswd${EXESUFFIX}.old
+   $INSTALL_SH -c tools/mkpasswd${EXESUFFIX} ${DPATH}mkpasswd${EXESUFFIX};
+fi 
+
+# install viconf
+if [ ! -f ${DPATH}viconf ]; then
+  echo installing viconf as ${DPATH}viconf${EXESUFFIX}
+  $INSTALL_SH -c tools/viconf${EXESUFFIX} ${DPATH}viconf${EXESUFFIX}
+  rm -f ${DPATH}vimotd${EXESUFFIX} ${DPATH}viklines${EXESUFFIX}
+  ln ${DPATH}viconf${EXESUFFIX} ${DPATH}vimotd${EXESUFFIX}
+  ln ${DPATH}viconf${EXESUFFIX} ${DPATH}viklines${EXESUFFIX};
+else
+   echo installing viconf as ${DPATH}viconf${EXESUFFIX}
+   echo previous viconf saved as viconf${EXESUFFIX}.old
+   mv ${DPATH}viconf${EXESUFFIX} ${DPATH}viconf${EXESUFFIX}.old
+   $INSTALL_SH -c tools/viconf${EXESUFFIX} ${DPATH}viconf${EXESUFFIX}
+   rm -f ${DPATH}vimotd${EXESUFFIX} ${DPATH}viklines${EXESUFFIX}
+   ln ${DPATH}viconf${EXESUFFIX} ${DPATH}vimotd${EXESUFFIX}
+   ln ${DPATH}viconf${EXESUFFIX} ${DPATH}viklines${EXESUFFIX};
+fi
+
+# install ircd.8
+dir_make ${DPATH}man8
+echo installing ircd.8 as ${DPATH}man8/ircd.8
+$INSTALL_SH -c doc/ircd.8 ${DPATH}man8/ircd.8
+
+# finished.
+echo install complete!

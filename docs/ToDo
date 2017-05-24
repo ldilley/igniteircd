@@ -1,0 +1,16 @@
+$Id: ToDo,v 1.3 2007/02/14 07:37:02 malign Exp $
+
+ToDo:
+-----
+
+Fix: +b of IRC Operators/Administrators in channels
+Add: IPv6 support
+Add: SSL support for clients
+Add: Integrated services?
+Add: Shorthand services commands (/NickServ identify)
+Add: Need UMODE to designate a Service
+Add: Add a numeric for clients that are bots
+Add: Allow administrators to see secret/private channels of clients
+Add: If client already has a mode, say so and don't change it
+
+Last updated: January 17, 2007

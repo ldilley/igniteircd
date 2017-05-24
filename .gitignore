@@ -1,0 +1,6 @@
+.cvsignore
+.svn/
+Makefile
+config.cache
+config.log
+config.status

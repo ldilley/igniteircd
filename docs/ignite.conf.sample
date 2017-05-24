@@ -1,0 +1,187 @@
+#$Id: ignite.conf.sample,v 1.1.1.1 2006/03/08 23:28:05 malign Exp $
+
+# Ignite ircd.conf
+
+# M: Line
+# Description: Specifies IRC server information.
+# Synopsis: M:server name:IP or hostname:server description:unused
+M:irc.somedomain.net:192.168.1.5:Ignite IRC Server:
+
+# A: Line
+# Descripion: Specifies administrative contact information.
+# Synopsis: A:IRC server name:location:contact email
+A:irc.somedomain.net:USA, Earth, Milky Way:Admin <admin@somedomain.net>
+
+# Y: Lines
+# Description: Specifies connection classes for use with connecting clients and servers.
+# Synopsis: Y:class number:ping frequency (seconds):connect frequency (seconds):maximum links:sendQ size
+# Client class
+Y:1:90:0:20:100000
+# Server class
+Y:2:90:300:10:4000000
+# Allow 100 users maximum but only 1 user per IP class
+Y:3:90:1:100:100000
+
+# I: Lines
+# Description: Authorize connecting clients and servers.
+# Synopsis: I:user@hostname/IP (wildcards allowed):optional connect password:hostname/IP (wildcards allowed):unused:connection class:default usermodes
+# Examples:
+# Allow anyone from somedomain.net domain for client connections
+I:NOMATCH::*.somedomain.net::1
+# Allow connection from domain fake.somedomain.net using password "password" for client connections
+I:NOMATCH:password:fake.somedomain.net::1
+# Using ident allow anyone from domain somedomain.net to connect for client connections
+I:*@somedomain.net::*@somedomain.net::1
+# Using ident only allow root from somedomain.net to connect for client connections
+I:root@somedomain.net::root@somedomain.net::1
+# Allow any username from this IP block for client connections
+I:*@192.168.0.0/16::x::1
+# Only allow root user from IP block for client connections
+I:root@192.168.0.0/16::x::1
+# Allow anyone from anywhere to connect using class 3.
+I:NOMATCH::*@*::3
+
+# O: Lines
+# Description: Specifies Global IRC Operators.
+# Synopsis: O:host/IP (wildcards allowed):password:nickname:flags:connection class
+# Available flags are:
+# K/k - allow/disallow kill and kline
+# O/o - allow/disallow global kill
+# R/r - allow/disallow remote squit/connect
+# U/u - allow/disallow unkline
+# G/g - allow/disallow gline
+# N/n - allow the use of +n (+c probably belongs controlled here too but isn't)
+# H/h - allow the use of /rehash, default is H for O and o, add h to disable an opers use of /rehash
+# D/d - allow the use of /die or /restart. Default is d for disallowing /die /restart 
+# Default flags for global operators are GKORUH
+# Default flags for local operators are KUH
+# These flags overrule what the normal privs of an oper would be.
+# Examples:
+# This allows a user to become a global operator from any machine in somedomain.net by typing /oper crunchy frog.
+O:*.somedomain.net:frog:crunchy:KORUGNHD:3:wskd
+
+# o: Lines
+# Description: Specifies Local IRC Operators.
+# Synopsis: o:host/IP (wildcards allowed):password:nickname:flags:connection class
+# Examples:
+# This allows a user to become a local operator from somedomain.net by typing /oper Nick password.
+o:user@somedomain.net:password:Nick:Korugnhd:3:wskd
+
+# C/N: Lines
+# Description: C: and N: lines are specified in pairs.
+# C: lines specify a server that your server is allowed to connect to.
+# N: lines specify a remote server allowed to connect to your server.
+# The C/N: lined must match their corresponding H/L: entries!
+# Synopsis: C:hostname/IP:password:server name:port:connection class
+# N:hostname/IP:password:server name:unused:connection class
+# Examples:
+# Connect to irc2.hub.net on port 6667 using the server connection class 2 defined in the Y: line section
+C:somedomain.net:serverpassword:irc2.hub.net:6667:2
+N:somedomain.net:serverpassword:irc2.hub.net:2:2
+# Connect to irc3.hub.net without autoconnectiong (no specified port) and use compression (c:)
+c:somedomain.net:serverpassword2:irc3.hub.net::2
+N:somedomain.net:serverpassword2:irc3.hub.net::2
+# If you wish to bind to a specific IP for an outbound connect there is an optional field after the class number you can use
+# This binds the outgoing interface to 192.168.0.1
+C:somedomain.net:serverpassword3:irc.hub.net::2:192.168.0.1
+N:somedomain.net:serverpassword3:irc3.hub.net::2
+# C and N lines may also use the "user@" combination in the same way as the I: lines
+C:user@somedomain.net:serverpassword4:irc2.hub.net::2
+N:user@somedomain.net:serverpassword4:irc2.hub.net::2
+
+# K: Lines
+# Description: Kill a user automatically upon connecting.
+# Synopsis: K:hostname (wildcards are allowed):reason:username
+# Examples:
+# Prevent user havoc at host trouble.somedomain.net from connecting
+K:*.somedomain.net:You are a trouble maker!:havoc
+# Prevent everyone whose username is root from connecting
+K:*:Don't IRC as root.:root
+
+# L: Lines
+# Description: Specifies leaf servers.
+# Synopsis: L:server name:unused:host name:optional leaf linked servers
+# Examples:
+# Specifies irc1.somedomain.net as a standalone leaf
+L:::irc1.somedomain.net
+# Specifies irc2.somedomain.net as a leaf with 1 link
+L:::irc2.somedomain.net:1
+# Allows any server connecting with domain *.somedomain.net to introduce a server matching *.somedomain.net
+L:*.somedomain.net::*.somedomain.net
+
+# H: Lines
+# Description: Specifies hub servers.
+# Synopsis: H:host:*:server name
+# Examples:
+# Specifies irc.hub.net as a hub server allowed to connect from any host in the somedomain.net domain
+H:*.somedomain.net:*:irc.hub.net
+
+# P: Lines
+# Description: Specifies ports to listen for clients on.
+# Synopsis: P:unused:IP or hostname:unused:port
+# Examples:
+# Listen on all interfaces on port 6667
+P::::6667
+# Listen on 192.168.1.17 on port 31337
+P::192.168.1.17::31337
+
+# D: Lines
+# Description: Rejects all connect attempts from matching IP or IP class with reason.
+# Synopsis: D:x.x.x.x or x.x.x.x/XX:reason
+# Examples: 
+D:192.168.1.17:No connecting from our server
+D:127.0.0/24:No connecting from localhost
+
+# d: Lines
+# Description: Immunity to D: lines.
+# Synopsis: d:x.x.x.x or x.x.x.x/XX:reason
+# Examples:
+d:192.168.1.31:Always allow this host
+
+# U: Lines
+# Description: Treat each of these servers as being part of your server cluster.
+# K: lines placed on this server will be forwarded to the servers named
+# in the U: lines here. LOCOPS will also be forwarded, but will appear
+# as "SLOCOPS" instead of "LOCOPS".
+# Synopsis: U:server name
+# Examples:
+# irc.hub.net has leaf servers irc1.somedomain.net and irc2.somedomain.net
+# Hub server would have both leafs listed in it's config
+U:irc1.somedomain.net
+U:irc2.somedomain.net
+# Each leaf server would have the hub server listed in it's config
+U:irc.hub.net
+
+# Q: Lines
+# Description: Prevent the use of nicknames or channels.
+# Synopsis: Q:channel/nickname:reason
+# Examples:
+# Deny use of "bot" anywhere in nickname
+Q:*bot*:No bots allowed!
+# Deny use of channel #warez (\ escapes the # character)
+Q:\#warez:This channel causes too much piracy.
+#
+Q:Global:Reserved for Services
+Q:ChanServ:Reserved for Services
+Q:HelpServ:Reserved for Services
+Q:NickServ:Reserved for Services
+Q:MemoServ:Reserved for Services
+Q:OperServ:Reserved for Services
+Q:SeenServ:Reserved for Services
+Q:StatServ:Reserved for Services
+
+# X: Lines
+# Description: Used to match gecos fields and prohibit users or warn about users
+# who have matching strings in those fields from getting on the server.
+# Synopsis: X:pattern:reason:unused:action 
+# Action values for X: lines are 0, 1, and 2.
+# 0 warns opers set +r only
+# 1 rejects the user and sends a notice to +r opers
+# 2 silently rejects the user
+# Examples:
+# Warn client only
+X:*sex*:pr0n spammer::0
+# Reject the client and send oper notice
+X:*hacker*:Script Kiddie::1
+# Silently reject the client
+X:*warez*:No piracy::2

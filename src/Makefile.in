@@ -1,0 +1,219 @@
+#
+# Makefile.in for ircd/src
+#
+# $Id: Makefile.in,v 1.1.1.1 2006/03/08 23:28:07 malign Exp $
+CC = @CC@
+RM = @RM@
+MKDEP = ${CC} -MM
+
+IRCDLIBS = @LIBS@ ../adns/libadns.a
+
+INCLUDES = -I../include
+CPPFLAGS = ${INCLUDES} @CPPFLAGS@
+ 
+# For developers
+# CFLAGS= -g -O2 -Wall
+#
+
+SRCS = \
+	adns.c \
+	blalloc.c \
+	channel.c \
+	class.c \
+	client.c \
+	dbuf.c \
+	dline_conf.c \
+	fdlist.c \
+	fileio.c \
+	flud.c \
+	hash.c \
+	irc_string.c \
+	ircd.c \
+	ircd_signal.c \
+	list.c \
+	listener.c \
+	m_admin.c \
+	m_away.c \
+	m_capab.c \
+	m_close.c \
+	m_connect.c \
+	m_die.c \
+	m_error.c \
+        m_fnick.c \
+	m_gline.c \
+	m_htm.c \
+	m_info.c \
+	m_ison.c \
+	m_help.c \
+	m_kill.c \
+	m_kline.c \
+	m_links.c \
+	m_list.c \
+	m_locops.c \
+	m_ltrace.c \
+	m_lusers.c \
+	m_message.c \
+	m_mode.c \
+	m_operwall.c \
+	m_oper.c \
+	m_pass.c \
+	m_ping.c \
+	m_pong.c \
+	m_quit.c \
+	m_rehash.c \
+	m_restart.c \
+	m_server.c \
+	m_set.c \
+	m_squit.c \
+	m_stats.c \
+	m_svinfo.c \
+	m_time.c \
+	m_trace.c \
+	m_unkline.c \
+	m_userhost.c \
+	m_users.c \
+	m_version.c \
+	m_wallops.c \
+	m_who.c \
+	m_whois.c \
+	match.c \
+	motd.c \
+	mtrie_conf.c \
+	numeric.c \
+	packet.c \
+	parse.c \
+	restart.c \
+	s_auth.c \
+	s_bsd.c \
+	s_conf.c \
+	s_debug.c \
+	s_log.c \
+	s_misc.c \
+	s_serv.c \
+	s_stats.c \
+	s_user.c \
+	s_zip.c \
+	scache.c \
+	send.c \
+	sprintf_irc.c \
+	whowas.c
+
+#
+# Do it this way for Ultrix, and its portable at least
+# just make sure OBJ's match SRC's (pointed out by Ian)
+# Ultrix can't use gnu make????? feh --Bleep
+# 
+#OBJS = \
+#	adns.o \
+#	blalloc.o \
+#	channel.o \
+#	class.o \
+#	client.o \
+#	dbuf.o \
+#	dline_conf.o \
+#	fdlist.o \
+#	fileio.o \
+#	hash.o \
+#	irc_string.o \
+#	ircd.o \
+#	ircd_signal.o \
+#	list.o \
+#	listener.o \
+#	m_admin.o \
+#	m_away.o \
+#	m_capab.o \
+#	m_close.o \
+#	m_connect.o \
+#	m_die.o \
+#	m_error.o \
+#	m_gline.o \
+#	m_help.o \
+#	m_htm.o \
+#	m_info.o \
+#	m_kline.o \
+#	m_links.o \
+#	m_list.o \
+#	m_locops.o \
+#	m_ltrace.o \
+#	m_lusers.o \
+#	m_mode.o \
+#	m_operwall.o \
+#	m_pass.o \
+#	m_ping.o \
+#	m_pong.o \
+#	m_quit.o \
+#	m_rehash.o \
+#	m_restart.o \
+#	m_server.o \
+#	m_set.o \
+#	m_squit.o \
+#	m_stats.c \
+#	m_svinfo.o \
+#	m_time.o \
+#	m_trace.o \
+#	m_unkline.o \
+#	m_users.o \
+#	m_version.o \
+#	m_wallops.o \
+#	m_who.o \
+#	m_whois.o \
+#	match.o \
+#	motd.o \
+#	mtrie_conf.o \
+#	numeric.o \
+#	packet.o \
+#	parse.o \
+#	res.o \
+#	s_auth.o \
+#	s_bsd.o \
+#	s_conf.o \
+#	s_debug.o \
+#	s_log.o \
+#	s_misc.o \
+#	s_numeric.o \
+#	s_serv.o \
+#	s_stats.o \
+#	s_user.o \
+#	s_zip.o \
+#	scache.o \
+#	send.o \
+#	sprintf_irc.o \
+#	support.o \
+#	whowas.o
+
+OBJS = ${SRCS:.c=.o}
+
+all: ircd
+
+build: all
+
+ircd: ${OBJS} version.o
+	${CC} ${LDFLAGS} -o $@ ${OBJS} version.o ${IRCDLIBS}
+	mv version.c version.c.last
+
+install: build
+	@echo "Please do a make install from the top level directory"
+
+version.c: version.c.SH
+	/bin/sh ./version.c.SH
+
+# this is really the default rule for c files
+.c.o:
+	${CC} ${CPPFLAGS} ${CFLAGS} -c $<
+
+.PHONY: depend clean distclean
+depend:
+	${MKDEP} ${CPPFLAGS} ${SRCS} > .depend
+
+lint:
+	lint -aacgprxhH $(CPPFLAGS) $(SRCS) >../lint.out
+
+clean:
+	${RM} -f *.o *.exe *~ ircd.core core ircd 
+
+distclean: clean
+	${RM} -f Makefile version.c.last
+
+numeric.o:	messages.tab
+
+include .depend

@@ -1,0 +1,30 @@
+$Id: Capabilities,v 1.1.1.1 2006/03/08 23:28:04 malign Exp $
+
+When you type /version you will often see something like this:
+Ignite/x.x.x irc.ignite-ircd.net ACGHiMpZ TS5owc
+
+This is a definitive on server capability characters.
+
+'A'	SENDQ_ALWAYS
+'C'	CMDLINE_CONFIG
+'D'	DEBUGMODE
+'e'	CHANMODE_E
+'g'	NO_FAKE_GLINES
+'G'	GLINES
+'H'	HUB
+'i'	SHOW_INVISIBLE_LUSERS
+'K'	USE_KNOCK
+'M'	IDLE_FROM_MSG
+'p'	CRYPT_OPER_PASSWORD
+'P'	CRYPT_LINK_PASSWORD
+'r'     LITTLE_I_LINES (restricted mode)
+'T'     IGNORE_BOGUS_TS
+'Y'	USE_SYSLOG
+'Z'	ZIP_LINKS
+
+'TS'    Supports TS
+'3'     TS Version 3 (Gives ops on splits, on opless channels)
+'5'	TS Version 5 (Impossible to gain ops after a netsplit)
+'o'     TS Only
+'w'     TS Warnings
+'c'	TS Current and higher only.

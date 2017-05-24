@@ -1,0 +1,79 @@
+#
+# Makefile.in for ircd/adns
+#
+# $Id: Makefile.in,v 1.1.1.1 2006/03/08 23:28:02 malign Exp $
+CC = @CC@
+RM = @RM@
+MKDEP = ${CC} -MM
+
+IRCDLIBS = @LIBS@
+
+INCLUDES = -I../include
+CPPFLAGS = ${INCLUDES} @CPPFLAGS@
+ 
+# For developers
+# CFLAGS= -g -O2 -Wall
+#
+
+SRCS = \
+	check.c \
+	event.c \
+	general.c \
+	parse.c \
+	poll.c \
+	query.c \
+	reply.c \
+	setup.c \
+	transmit.c \
+	types.c
+
+
+#
+# Do it this way for Ultrix, and its portable at least
+# just make sure OBJ's match SRC's (pointed out by Ian)
+# Ultrix can't use gnu make????? feh --Bleep
+#
+#OBJS = \ 
+#	check.o \
+#	event.o \
+#	general.o \
+#	parse.o \
+#	poll.o \
+#	query.o \
+#	reply.o \
+#	setup.o \
+#	transmit.o \
+#	types.o
+
+
+
+OBJS = ${SRCS:.c=.o}
+
+libadns.a: ${OBJS}
+	rm -f $@
+	${AR} csqv $@ ${OBJS}
+
+
+all: libadns.a
+build: all
+
+
+# this is really the default rule for c files
+.c.o:
+	${CC} ${CPPFLAGS} ${CFLAGS} -c $<
+
+.PHONY: depend clean distclean
+
+lint:
+	lint -aacgprxhH $(CPPFLAGS) $(SRCS) >../lint.out
+
+clean:
+	${RM} -f *.o *.a
+
+distclean: clean
+	${RM} -f Makefile 
+
+depend:
+	${MKDEP} ${CPPFLAGS} ${SRCS} > .depend
+
+
